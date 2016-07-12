@@ -1,0 +1,22 @@
+h1 {
+    color: darkblue;
+}
+
+.score {
+    color: white;
+}
+
+.gold {
+  color: white;
+}
+
+#gamelink {
+  text-align: center;
+  border: 1px solid white
+}
+
+body {
+    background-image: url("spacetile.jpg");
+    background-repeat: repeat-1;
+    color: White;
+}
