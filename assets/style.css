@@ -20,3 +20,7 @@ body {
     background-repeat: repeat-1;
     color: White;
 }
+
+.jumbotron{
+  background-color : rgba(125, 125, 125, 0.1);
+}
