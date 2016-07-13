@@ -17,7 +17,7 @@ jQuery("#scoresbtn").on("click", function() {
     jQuery("#content").append(
         "<ul>" +
             "<li>" + "Selo" + "</li>" +
-            "<li>" + "James" + "</li>" +
+            "<li>" + "Darth Vader" + "</li>" +
             "<li>" + "Snoop Dogg" + "</li>" +
         "</ul>"
     );
@@ -36,7 +36,7 @@ jQuery("#helpbtn").on("click", function() {
         "<ul>"
             + "<li>" + "Press SPACE to jump your TIE Fighter" + "</li>"
             + "<li>" + "Avoid incoming meteors!" + "</li>"
-            + "<li>" + "BEWARE! Shockwaves disables your TIE Fighter!"
+            + "<li>" + "BEWARE! Shockwaves makes your TIE Fighter heavier!"
         + "</ul>"
     );
 

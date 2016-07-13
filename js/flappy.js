@@ -25,7 +25,8 @@ var height = 400;
 var width = 790;
 var balloons = [];
 var weights = [];
-var gameGravity = 200;
+var gameGravity = 400;
+var balloonValue = 170;
 
 function preload() {
   game.load.image("playerImg", "../assets/TIE Fighter.png");
@@ -65,6 +66,59 @@ function generateBalloons(){
     }
 }
 
+function start(){
+
+splashDisplay.destroy();
+  game.input.keyboard.addKey(Phaser.Keyboard.ENTER).onDown.remove(start);
+  var pipeInterval = 1.30 * Phaser.Timer.SECOND;
+  game.time.events.loop(
+    pipeInterval,
+    generate
+  );
+
+  game.physics.startSystem(Phaser.Physics.ARCADE);
+
+  game.input
+  .keyboard.addKey(Phaser.Keyboard.SPACEBAR)
+  .onDown.add(spaceHandler);
+
+  player = game.add.sprite(300, 170, "playerImg");
+  game.physics.arcade.enable(player);
+  player.anchor.setTo(0.5, 0.5);
+  player.body.velocity.x = 0;
+  player.body.velocity.y = -100;
+  player.body.gravity.y = gameGravity;
+  player.x = 200;
+  player.y = 150;
+  player.x = player.x + 1;
+
+  game.input.keyboard
+  .addKey(Phaser.Keyboard.SPACEBAR)
+  .onDown
+  .add(playerJump);
+
+  labelScore = game.add.text(20, 320,"0");
+
+  /*
+  game.input.onDown.add(clickHandler);
+  game.input
+  .keyboard.addKey(Phaser.Keyboard.RIGHT)
+  .onDown.add(moveRight);
+  game.input
+  .keyboard.addKey(Phaser.Keyboard.LEFT)
+  .onDown.add(moveLeft);
+  game.input
+  .keyboard.addKey(Phaser.Keyboard.UP)
+  .onDown.add(moveUp);
+  game.input
+  .keyboard.addKey(Phaser.Keyboard.DOWN)
+  .onDown.add(moveDown);
+  */
+
+  game.paused = false;
+}
+
+
 function addPipeBlock(x, y) {
   // create a new pipe block
   var block = game.add.sprite(x,y,"pipeBlock");
@@ -82,66 +136,29 @@ function addPipeBlock(x, y) {
 
 function create() {
   var background = game.add.image(0, 0, "backgroundImg");
-  var pipeInterval = 2.00 * Phaser.Timer.SECOND;
-  game.time.events.loop(
-    pipeInterval,
-    generate
-  );
-
-  function generate() {
-      var diceRoll = game.rnd.integerInRange(1, 5);
-      if(diceRoll==1) {
-          generateBalloons();
-      } else if(diceRoll==2) {
-          generateWeight();
-      } else {
-          generatePipe();
-      }
-  }
-
-  game.physics.startSystem(Phaser.Physics.ARCADE);
-
-  game.input
-  .keyboard.addKey(Phaser.Keyboard.SPACEBAR)
-  .onDown.add(spaceHandler);
-
   background.width = 790;
   background.height = 400;
   game.stage.setBackgroundColor("#262626");
-  player = game.add.sprite(300, 170, "playerImg");
-  game.physics.arcade.enable(player);
-  player.anchor.setTo(0.5, 0.5);
-  player.body.velocity.x = 0;
-  player.body.velocity.y = -100;
-  player.body.gravity.y = 500;
-  player.body.gravity.y = 500;
-  player.body.gravity.y = 500;
-  player.x = 200;
-  player.y = 150;
-  player.x = player.x + 1;
 
-  game.input.keyboard
-  .addKey(Phaser.Keyboard.SPACEBAR)
-  .onDown
-  .add(playerJump);
+  splashDisplay = game.add.text(120,150, "Press ENTER to start, SPACEBAR to fly",{fill : "white"});
 
-  game.input.onDown.add(clickHandler);
+  game.paused = true;
   game.input
-  .keyboard.addKey(Phaser.Keyboard.RIGHT)
-  .onDown.add(moveRight);
-  game.input
-  .keyboard.addKey(Phaser.Keyboard.LEFT)
-  .onDown.add(moveLeft);
-  game.input
-  .keyboard.addKey(Phaser.Keyboard.UP)
-  .onDown.add(moveUp);
-  game.input
-  .keyboard.addKey(Phaser.Keyboard.DOWN)
-  .onDown.add(moveDown);
-
-  labelScore = game.add.text(20, 320,"0");
-
+  .keyboard.addKey(Phaser.Keyboard.ENTER)
+  .onDown.add(start);
 }
+
+function generate() {
+    var diceRoll = game.rnd.integerInRange(1, 4);
+    if(diceRoll==1) {
+        generateBalloons();
+    } else if(diceRoll==2) {
+        generateWeight();
+    } else {
+        generatePipe();
+    }
+}
+
 function moveRight() {
   player.x = player.x + 10;
 
@@ -200,9 +217,9 @@ function update() {
 
       game.physics.arcade.overlap(player, balloons[i], function(){
 
-        changeGravity(-50);
-        game.time.events.add(2 * Phaser.Timer.SECOND,
-          function () {changeGravity(50);}
+        changeGravity(-balloonValue);
+        game.time.events.add(5 * Phaser.Timer.SECOND,
+          function () {changeGravity(balloonValue);}
         );
 
         balloons[i].destroy();
@@ -239,7 +256,8 @@ function update() {
   }
 
   function gameOver(){
-    gameGravity = 200;
+    score=0;
+    gameGravity = 500;
       registerScore();
     game.state.restart();
 
