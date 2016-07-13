@@ -18,27 +18,51 @@ var score = 0;
 var player;
 var labelScore;
 var pipes = [];
+var gapMargin = 50;
+var gapSize = 100;
+var blockHeight = 50;
+var height = 400;
+var width = 790;
+var balloons = [];
+var weights = [];
 
 function preload() {
   game.load.image("playerImg", "../assets/TIE Fighter.png");
   game.load.image("backgroundImg", "../assets/SpaceBattle.jpg");
   game.load.audio("score", "../assets/Laser.mp3");
   game.load.image("pipeBlock","../assets/TC_Meteor.gif");
+  game.load.image("balloons","../assets/Energy.png");
 
 }
 
 function generatePipe() {
-  var gapStart = game.rnd.integerInRange(1, 5);
-  for (var count=0; count<8; count=count+1) {
-    if(count != gapStart && count != gapStart + 1) {
-      addPipeBlock(800, count * 50);
-    }
-  }
-  changeScore();
-  game.world.bringToTop(labelScore)
+  var gapStart = game.rnd.integerInRange(gapMargin, height - gapSize - gapMargin);
+
+   for(var y = gapStart; y > 0; y -= blockHeight){
+       addPipeBlock(width, y - blockHeight);
+   }
+
+   for(var y = gapStart + gapSize; y < height; y += blockHeight) {
+       addPipeBlock(width, y);
+   }
+   changeScore();
+  game.world.bringToTop(labelScore);
 }
 
-
+function generateBalloons(){
+    var BHeight = game.rnd.integerInRange(0, height-50)
+    var bonus = game.add.sprite(width, BHeight, "balloons");
+    bonus.width = 50;
+    bonus.height = 50;
+    balloons.push(bonus);
+    game.physics.arcade.enable(bonus);
+    bonus.body.velocity.x = - 250;
+    bonus.body.velocity.y = game.rnd.integerInRange(180, 200);
+    var Direction = game.rnd.integerInRange(0, 1);
+    if (Direction == 0) {
+      bonus.body.velocity.y *=-1;
+    }
+}
 
 function addPipeBlock(x, y) {
   // create a new pipe block
@@ -60,8 +84,21 @@ function create() {
   var pipeInterval = 1.75 * Phaser.Timer.SECOND;
   game.time.events.loop(
     pipeInterval,
-    generatePipe
+    generate
   );
+
+  var gameGravity = 200;
+
+  function generate() {
+      var diceRoll = game.rnd.integerInRange(1, 5);
+      if(diceRoll==1) {
+          generateBalloons();
+      } else if(diceRoll==2) {
+          generateWeight();
+      } else {
+          generatePipe();
+      }
+  }
 
   game.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -74,6 +111,7 @@ function create() {
   game.stage.setBackgroundColor("#262626");
   player = game.add.sprite(300, 170, "playerImg");
   game.physics.arcade.enable(player);
+  player.anchor.setTo(0.5, 0.5);
   player.body.velocity.x = 0;
   player.body.velocity.y = -100;
   player.body.gravity.y = 500;
@@ -144,9 +182,34 @@ function playerJump() {
   player.body.velocity.y = -200;
 
 }
+
+function generateWeight() {
+
+
+}
 //This function updates the scene. It is called for every new frame.
 
+
+function changeGravity(g) {
+  gameGravity += g;
+  player.body.gravity.y = gameGravity;
+}
+
 function update() {
+
+  for (var count = 0; count <balloons.length; count +=1){
+    if (balloons[count].y<0){
+      balloons[count].y=5;
+      balloons[count].body.velocity.y *=-1;
+    }
+    if (balloons[count].y>height-50){
+      balloons[count].y=height-55;
+      balloons[count].body.velocity.y*=-1;
+    }
+  }
+
+  var gameSpeed = 200;
+
   game.physics.arcade.overlap(
     player,
     pipes,
@@ -155,9 +218,15 @@ function update() {
     if(player.y < 0 || player.y > 400){
       gameOver();
     }
+
+
+
+    player.rotation = Math.atan(player.body.velocity.y / 1000);
   }
 
   function gameOver(){
+    gameGravity = 200;
+    game.state.restart();
     game.destroy();
     registerScore();
     location.reload();
