@@ -36,6 +36,7 @@ jQuery("#helpbtn").on("click", function() {
         "<ul>"
             + "<li>" + "Press SPACE to jump your TIE Fighter" + "</li>"
             + "<li>" + "Avoid incoming meteors!" + "</li>"
+            + "<li>" + "BEWARE! Shockwaves disables your TIE Fighter!"
         + "</ul>"
     );
 

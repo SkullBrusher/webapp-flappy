@@ -25,6 +25,7 @@ var height = 400;
 var width = 790;
 var balloons = [];
 var weights = [];
+var gameGravity = 200;
 
 function preload() {
   game.load.image("playerImg", "../assets/TIE Fighter.png");
@@ -81,13 +82,11 @@ function addPipeBlock(x, y) {
 
 function create() {
   var background = game.add.image(0, 0, "backgroundImg");
-  var pipeInterval = 1.75 * Phaser.Timer.SECOND;
+  var pipeInterval = 2.00 * Phaser.Timer.SECOND;
   game.time.events.loop(
     pipeInterval,
     generate
   );
-
-  var gameGravity = 200;
 
   function generate() {
       var diceRoll = game.rnd.integerInRange(1, 5);
@@ -197,6 +196,21 @@ function changeGravity(g) {
 
 function update() {
 
+  for(var i = balloons.length - 1; i >= 0; i--){
+
+      game.physics.arcade.overlap(player, balloons[i], function(){
+
+        changeGravity(-50);
+        game.time.events.add(2 * Phaser.Timer.SECOND,
+          function () {changeGravity(50);}
+        );
+
+        balloons[i].destroy();
+        balloons.splice(i, 1);
+
+      });
+  }
+
   for (var count = 0; count <balloons.length; count +=1){
     if (balloons[count].y<0){
       balloons[count].y=5;
@@ -226,8 +240,8 @@ function update() {
 
   function gameOver(){
     gameGravity = 200;
+      registerScore();
     game.state.restart();
-    game.destroy();
-    registerScore();
-    location.reload();
+
+  //  location.reload();
   }
