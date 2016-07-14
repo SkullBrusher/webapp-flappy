@@ -23,17 +23,23 @@ var gapSize = 100;
 var blockHeight = 50;
 var height = 400;
 var width = 790;
-var balloons = [];
+var shockwave = [];
+var batteries = [];
 var weights = [];
 var gameGravity = 400;
-var balloonValue = 170;
+var shockwaveValue = 170;
+var batteriesValue = 150;
+
+var invincibleMod = false;
+var invincibleTimer;
 
 function preload() {
   game.load.image("playerImg", "../assets/TIE Fighter.png");
   game.load.image("backgroundImg", "../assets/SpaceBattle.jpg");
   game.load.audio("score", "../assets/Laser.mp3");
   game.load.image("pipeBlock","../assets/TC_Meteor.gif");
-  game.load.image("balloons","../assets/Energy.png");
+  game.load.image("shockwave","../assets/Energy.png");
+  game.load.image("batteries","../assets/deathstar.gif");
 
 }
 
@@ -51,12 +57,12 @@ function generatePipe() {
   game.world.bringToTop(labelScore);
 }
 
-function generateBalloons(){
-    var BHeight = game.rnd.integerInRange(0, height-50)
-    var bonus = game.add.sprite(width, BHeight, "balloons");
+function generateShockwave(){
+    var BHeight = game.rnd.integerInRange(0, height-50);
+    var bonus = game.add.sprite(width, BHeight, "shockwave");
     bonus.width = 50;
     bonus.height = 50;
-    balloons.push(bonus);
+    shockwave.push(bonus);
     game.physics.arcade.enable(bonus);
     bonus.body.velocity.x = - 250;
     bonus.body.velocity.y = game.rnd.integerInRange(180, 200);
@@ -64,6 +70,18 @@ function generateBalloons(){
     if (Direction == 0) {
       bonus.body.velocity.y *=-1;
     }
+}
+
+function generateBatteries(){
+  var BAHeight = game.rnd.integerInRange(0, height-50);
+  var bonus = game.add.sprite(width, BAHeight, "batteries");
+  bonus.width = 50;
+  bonus.height = 50;
+  batteries.push(bonus);
+  game.physics.arcade.enable(bonus);
+  bonus.body.velocity.x = - 250;
+
+
 }
 
 function start(){
@@ -149,11 +167,13 @@ function create() {
 }
 
 function generate() {
-    var diceRoll = game.rnd.integerInRange(1, 4);
+    var diceRoll = game.rnd.integerInRange(1, 6);
     if(diceRoll==1) {
-        generateBalloons();
+        generateShockwave();
     } else if(diceRoll==2) {
         generateWeight();
+    } else if(diceRoll==3) {
+        generateBatteries();
     } else {
         generatePipe();
     }
@@ -213,39 +233,59 @@ function changeGravity(g) {
 
 function update() {
 
-  for(var i = balloons.length - 1; i >= 0; i--){
+  for(var i = shockwave.length - 1; i >= 0; i--){
 
-      game.physics.arcade.overlap(player, balloons[i], function(){
+      game.physics.arcade.overlap(player, shockwave[i], function(){
 
-        changeGravity(-balloonValue);
+        changeGravity(-shockwaveValue);
         game.time.events.add(5 * Phaser.Timer.SECOND,
-          function () {changeGravity(balloonValue);}
+          function () {changeGravity(shockwaveValue);}
         );
 
-        balloons[i].destroy();
-        balloons.splice(i, 1);
+        shockwave[i].destroy();
+        shockwave.splice(i, 1);
 
       });
   }
 
-  for (var count = 0; count <balloons.length; count +=1){
-    if (balloons[count].y<0){
-      balloons[count].y=5;
-      balloons[count].body.velocity.y *=-1;
+  for(var i = batteries.length - 1; i >= 0; i--){
+
+      game.physics.arcade.overlap(player, batteries[i], function(){
+
+        invincibleMod = true;
+        console.log("on");
+        game.time.events.remove(invincibleTimer);
+        invincibleTimer = game.time.events.add(5 * Phaser.Timer.SECOND,
+          function () {console.log("off");
+            invincibleMod = false;}
+        );
+
+        batteries[i].destroy();
+        batteries.splice(i, 1);
+
+      });
+  }
+
+
+  for (var count = 0; count <shockwave.length; count +=1){
+    if (shockwave[count].y<0){
+      shockwave[count].y=5;
+      shockwave[count].body.velocity.y *=-1;
     }
-    if (balloons[count].y>height-50){
-      balloons[count].y=height-55;
-      balloons[count].body.velocity.y*=-1;
+    if (shockwave[count].y>height-50){
+      shockwave[count].y=height-55;
+      shockwave[count].body.velocity.y*=-1;
     }
   }
 
   var gameSpeed = 200;
 
+if (!invincibleMod) {
   game.physics.arcade.overlap(
     player,
     pipes,
     gameOver);
-
+}
     if(player.y < 0 || player.y > 400){
       gameOver();
     }
